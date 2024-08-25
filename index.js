@@ -9,6 +9,7 @@ const passport = require('passport');
 const signupRoute = require('./routes/signup');
 const loginRoute = require('./routes/login');
 const forgotPasswordRoute = require('./routes/forgot');
+const path = require('path');
 
 
 const app = express();
@@ -63,6 +64,12 @@ passport.deserializeUser((id, done) => {
 app.use('/signup', signupRoute(pool));
 app.use('/login', loginRoute(pool)); 
 app.use('/auth', forgotPasswordRoute(pool));
+app.get('/privacy', (req, res) => {
+  res.sendFile(path.join(__dirname, './routes/privacy.html'));
+}); 
+app.get('/terms', (req, res) => {
+  res.sendFile(path.join(__dirname, './routes/terms.html'));
+}); 
 
 
 app.options('*', cors());
