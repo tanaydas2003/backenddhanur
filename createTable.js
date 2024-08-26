@@ -1,4 +1,3 @@
-
 require('dotenv').config();
 const { Pool } = require('pg');
 
@@ -18,7 +17,6 @@ const createTables = async () => {
   try {
     await client.query('CREATE EXTENSION IF NOT EXISTS "uuid-ossp";');
 
-    // Create individual_users table
     await client.query(`
       CREATE TABLE IF NOT EXISTS individual_users (
         id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -32,28 +30,16 @@ const createTables = async () => {
       );
     `);
 
-    // Create organization_users table
     await client.query(`
       CREATE TABLE IF NOT EXISTS organization_users (
-        user_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
         email VARCHAR(255) NOT NULL UNIQUE,
         password VARCHAR(255) NOT NULL,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      );
-    `);
-
-    // Create organizations table with uniqueid as the primary key
-    await client.query(`
-      CREATE TABLE IF NOT EXISTS organizations (
-        organization_id UUID NOT NULL DEFAULT uuid_generate_v4(),
-        user_id UUID NOT NULL,
-        uniqueid VARCHAR(100) GENERATED ALWAYS AS (organization_id::text || '-' || user_id::text) STORED PRIMARY KEY,
         org_name VARCHAR(255) NOT NULL,
         admin_full_name VARCHAR(255) NOT NULL,
         phone_no VARCHAR(20) NOT NULL,
         org_website VARCHAR(255) NOT NULL,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        CONSTRAINT fk_user_id FOREIGN KEY(user_id) REFERENCES organization_users(user_id)
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
     `);
 
@@ -66,6 +52,3 @@ const createTables = async () => {
 };
 
 createTables().catch(err => console.error('Error executing script:', err));
-
-
-
