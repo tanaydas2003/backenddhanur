@@ -158,7 +158,7 @@ module.exports = (pool) => {
     }
   );
 
-  //Google OAuth strategy
+  // Google OAuth strategy
   passport.use(new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
@@ -169,11 +169,19 @@ module.exports = (pool) => {
     try {
       const userType = req.query.state; // Get userType from state parameter passed during auth initiation
       let user;
-
-  
       if (userType === 'individual') {
-        // Individual user logic remains the same
-      } else if (userType === 'organization') {
+        const userResult = await pool.query('SELECT * FROM individual_users WHERE google_id = $1', [profile.id]);
+        user = userResult.rows[0];
+
+        if (!user) {
+          const newUserResult = await pool.query(
+            'INSERT INTO individual_users (google_id, first_name, last_name, email, password) VALUES ($1, $2, $3, $4, $5) RETURNING *',
+            [profile.id, profile.name.givenName, profile.name.familyName || 'not_available', profile.emails[0].value, 'google']
+          );
+          user = newUserResult.rows[0];
+        }
+      } 
+      else if (userType === 'organization') {
         // Find or create organization user
         const userResult = await pool.query('SELECT * FROM organization_users WHERE email = $1', [profile.emails[0].value]);
         user = userResult.rows[0];
@@ -193,7 +201,6 @@ module.exports = (pool) => {
           );
         }
       }
-  
       done(null, { ...user, userType });
     } catch (err) {
       done(err, null);
