@@ -8,6 +8,7 @@ const passport = require('passport');
 const signupRoute = require('./routes/signup');
 const loginRoute = require('./routes/login');
 const forgotPasswordRoute = require('./routes/forgot');
+const profileRoute = require('./routes/profile');
 const path = require('path');
 
 // Initialize Express app
@@ -121,6 +122,7 @@ passport.deserializeUser((userSession, done) => {
 app.use('/signup', signupRoute(pool));
 app.use('/login', loginRoute(pool)); // OAuth routes are now included here
 app.use('/auth', forgotPasswordRoute(pool));
+app.use('/profile', profileRoute(pool));
 app.get('/privacy', (req, res) => {
   res.sendFile(path.join(__dirname, './routes/privacy.html'));
 }); 
